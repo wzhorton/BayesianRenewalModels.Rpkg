@@ -1,0 +1,3 @@
+[submodule "inst/julia/BayesianRenewalModels.jl"]
+	path = inst/julia/BayesianRenewalModels.jl
+	url = git@github.com:wzhorton/BayesianRenewalModels.jl.git
