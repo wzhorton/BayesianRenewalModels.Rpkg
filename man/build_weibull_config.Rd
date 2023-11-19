@@ -4,12 +4,12 @@
 \alias{build_weibull_config}
 \title{Weibull config builder}
 \usage{
-build_weibull_config(a_alpha = 1, b_alpha = 1, a_lam = 1, b_lam = 1)
+build_weibull_config(a_alpha = 1, b_alpha = 1, a_lambda = 1, b_lambda = 1)
 }
 \arguments{
 \item{a_alpha, b_alpha}{weibull shape hyperparameters}
 
-\item{a_lam, b_lam}{weibull scale hyperparameters}
+\item{a_lambda, b_lambda}{weibull scale hyperparameters}
 }
 \value{
 list containing metadata and relevant parameter info

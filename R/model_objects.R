@@ -1,26 +1,5 @@
 #### Model object builders ####
 
-#------------------------------#
-# Generic config object loader #
-#------------------------------#
-
-nondefault_config_string <- function(config){
-  output_command <- paste0(config$subtype,"(")
-  for(parm in config$parameters){
-    if(!parm$default){
-      if(parm$type == "float" && abs(parm$value) == floor(abs(parm$value))){
-        formatted_value <- sprintf("%.1f", parm$value)
-      } else {
-        formatted_value <- as.character(parm$value)
-      }
-      output_command <- paste0(
-        output_command, parm$julia_name, "=", formatted_value,", "
-      )
-    }
-  }
-  paste0(output_command,")")
-}
-
 
 #----------------------#
 # ProcessType builders #
@@ -36,8 +15,19 @@ build_hrp_config <- function(){
   list(
     type = "process",
     subtype = "HRP",
+    extract_function = extract_hrp_chains,
     parameters = list()
   )
+}
+
+extract_hrp_chains <- function(julia){
+  chains <- list()
+  chains$eval_x = julia$eval('process_output.eval_x')
+  chains$eval_kx = julia$eval('process_output.eval_kx')
+  chains$density = julia$eval('process_output.density')
+  chains$hazard = julia$eval('process_output.hazard')
+  chains$kfunction = julia$eval('process_output.kfunction')
+  return(chains)
 }
 
 #' MRP config builder
@@ -51,6 +41,7 @@ build_mrp_config <- function(a_p = 0.1){
   list(
     type = "process",
     subtype = "MRP",
+    extract_function = extract_mrp_chains,
     parameters = list(
       list(
         julia_name = "a_p",
@@ -60,6 +51,15 @@ build_mrp_config <- function(a_p = 0.1){
       )
     )
   )
+}
+
+extract_mrp_chains <- function(julia){
+  chains <- list()
+  chains$p = julia$eval('process_output.p')
+  chains$eval_x = julia$eval('process_output.eval_x')
+  chains$density = julia$eval('process_output.density')
+  chains$hazard = julia$eval('process_output.hazard')
+  return(chains)
 }
 
 
@@ -78,6 +78,7 @@ build_dpsb_config <- function(a_alpha = 5.0, b_alpha = 1.0){
   list(
     type = "stickbreaking",
     subtype = "DPSB",
+    extract_function = extract_dpsb_chains,
     parameters = list(
       list(
         julia_name = "a_α",
@@ -95,6 +96,12 @@ build_dpsb_config <- function(a_alpha = 5.0, b_alpha = 1.0){
   )
 }
 
+extract_dpsb_chains <- function(julia){
+  chains <- list()
+  chains$alpha = julia$eval('stickbreaking_output.α')
+  return(chains)
+}
+
 #' LogitSB config builder
 #'
 #' Logit Stick-Breaking (LogitSB)
@@ -107,6 +114,7 @@ build_logitsb_config <- function(m_mu = 0.0, s_mu = 1000.0, a_sig2 = 1.0, b_sig2
   list(
     type = "stickbreaking",
     subtype = "LogitSB",
+    extract_function = extract_logitsb_chains,
     parameters = list(
       list(
         julia_name = "m_μ",
@@ -136,6 +144,14 @@ build_logitsb_config <- function(m_mu = 0.0, s_mu = 1000.0, a_sig2 = 1.0, b_sig2
   )
 }
 
+extract_logitsb_chains <- function(julia){
+  chains <- list()
+  chains$psi = julia$eval('stickbreaking_output.ψ')
+  chains$mu = julia$eval('stickbreaking_output.μ')
+  chains$sig2 = julia$eval('stickbreaking_output.σ')
+  return(chains)
+}
+
 #' DSLogitSB config builder
 #'
 #' Dependent Sojourns Logit Stick-Breaking (DSLogitSB)
@@ -161,6 +177,7 @@ build_dslogitsb_config <- function(
   list(
     type = "stickbreaking",
     subtype = "DSLogitSB",
+    extract_function = extract_dslogitsb_chains,
     parameters = list(
       list(
         julia_name = "m_0",
@@ -220,6 +237,19 @@ build_dslogitsb_config <- function(
   )
 }
 
+extract_dslogitsb_chains <- function(julia){
+  chains <- list()
+  chains$psi = julia$eval('stickbreaking_output.ψ')
+  chains$mu = julia$eval('stickbreaking_output.μ')
+  chains$alpha = julia$eval('stickbreaking_output.α')
+  chains$beta = julia$eval('stickbreaking_output.β')
+  chains$sig2_psi = julia$eval('stickbreaking_output.σ_ψ')
+  chains$sig2_alpha = julia$eval('stickbreaking_output.σ_α')
+  chains$sig2_beta = julia$eval('stickbreaking_output.σ_β')
+  chains$sig2_mu = julia$eval('stickbreaking_output.σ_μ')
+  return(chains)
+}
+
 
 #-----------------------#
 # DensityModel builders #
@@ -228,15 +258,17 @@ build_dslogitsb_config <- function(
 #' Weibull config builder
 #'
 #' @param a_alpha,b_alpha weibull shape hyperparameters
-#' @param a_lam,b_lam weibull scale hyperparameters
+#' @param a_lambda,b_lambda weibull scale hyperparameters
 #' @return list containing metadata and relevant parameter info
 #' @export
 build_weibull_config <- function(
-    a_alpha = 1.0, b_alpha = 1.0, a_lam = 1.0, b_lam = 1.0
+    a_alpha = 1.0, b_alpha = 1.0, a_lambda = 1.0, b_lambda = 1.0
 ){
   list(
     type = "density",
     subtype = "WeibullModel",
+    requires_stickbreaking = FALSE,
+    extract_function = extract_weibull_chains,
     parameters = list(
       list(
         julia_name = "a_α",
@@ -252,41 +284,50 @@ build_weibull_config <- function(
       ),
       list(
         julia_name = "a_λ",
-        value = a_lam,
+        value = a_lambda,
         type = "float",
-        default = a_lam == formals(build_weibull_config)$a_lam
+        default = a_lambda == formals(build_weibull_config)$a_lambda
       ),
       list(
         julia_name = "b_λ",
-        value = b_lam,
+        value = b_lambda,
         type = "float",
-        default = b_lam == formals(build_weibull_config)$b_lam
+        default = b_lambda == formals(build_weibull_config)$b_lambda
       )
     )
   )
+}
+
+extract_weibull_chains <- function(julia){
+  chains <- list()
+  chains$alpha = julia$eval('density_output.α')
+  chains$lambda = julia$eval('density_output.λ')
+  return(chains)
 }
 
 #' GammaMixture config builder
 #'
 #' @param n_component number of mixture components
 #' @param a_kappa gamma kernel shape prior
-#' @param a_gam_kappa,b_gam_kappa gamma kernel shape hyperparameters
-#' @param a_lam gamma kernel scale prior
-#' @param a_gam_lam,b_gam_lam gamma kernel scale hyperparameters
+#' @param a_gamma_kappa,b_gamma_kappa gamma kernel shape hyperparameters
+#' @param a_lambda gamma kernel scale prior
+#' @param a_gamma_lambda,b_gamma_lambda gamma kernel scale hyperparameters
 #' @return list containing metadata and relevant parameter info
 #' @export
 build_gammamix_config <- function(
     n_component,
     a_kappa = 3.0,
-    a_gam_kappa = 1.0,
-    b_gam_kappa = 1.0,
-    a_lam = 2.1,
-    a_gam_lam = 1.0,
-    b_gam_lam = 1.0
+    a_gamma_kappa = 1.0,
+    b_gamma_kappa = 1.0,
+    a_lambda = 2.1,
+    a_gamma_lambda = 1.0,
+    b_gamma_lambda = 1.0
 ){
   list(
     type = "density",
     subtype = "GammaMixtureModel",
+    extract_function = extract_gammamix_chains,
+    requires_stickbreaking = TRUE,
     parameters = list(
       list(
         julia_name = "n_component",
@@ -302,55 +343,67 @@ build_gammamix_config <- function(
       ),
       list(
         julia_name = "a_γ_κ",
-        value = a_gam_kappa,
+        value = a_gamma_kappa,
         type = "float",
-        default = a_gam_kappa == formals(build_gammamix_config)$a_gam_kappa
+        default = a_gamma_kappa == formals(build_gammamix_config)$a_gamma_kappa
       ),
       list(
         julia_name = "b_γ_κ",
-        value = b_gam_kappa,
+        value = b_gamma_kappa,
         type = "float",
-        default = b_gam_kappa == formals(build_gammamix_config)$b_gam_kappa
+        default = b_gamma_kappa == formals(build_gammamix_config)$b_gamma_kappa
       ),
       list(
         julia_name = "a_λ",
-        value = a_lam,
+        value = a_lambda,
         type = "float",
-        default = a_lam == formals(build_gammamix_config)$a_lam
+        default = a_lambda == formals(build_gammamix_config)$a_lambda
       ),
       list(
         julia_name = "a_γ_λ",
-        value = a_gam_lam,
+        value = a_gamma_lambda,
         type = "float",
-        default = a_gam_lam == formals(build_gammamix_config)$a_gam_lam
+        default = a_gamma_lambda == formals(build_gammamix_config)$a_gamma_lambda
       ),
       list(
         julia_name = "b_γ_λ",
-        value = b_gam_lam,
+        value = b_gamma_lambda,
         type = "float",
-        default = b_gam_lam == formals(build_gammamix_config)$b_gam_lam
+        default = b_gamma_lambda == formals(build_gammamix_config)$b_gamma_lambda
       )
     )
   )
+}
+
+extract_gammamix_chains <- function(julia){
+  chains <- list()
+  chains$kappa = julia$eval('density_output.κ')
+  chains$lambda = julia$eval('density_output.λ')
+  chains$gamma_kappa = julia$eval('density_output.γ_κ')
+  chains$gamma_lambda = julia$eval('density_output.γ_λ')
+  chains$omega = julia$eval('density_output.ω')
+  return(chains)
 }
 
 #' UniformMixture config builder
 #'
 #' @param n_component number of mixture components
 #' @param a_eta,b_eta inverse gamma shape hyperparameters
-#' @param a_gam,b_gam inverse gamma scale hyperparameters
+#' @param a_gamma,b_gamma inverse gamma scale hyperparameters
 #' @return list containing metadata and relevant parameter info
 #' @export
 build_uniformmix_config <- function(
     n_component,
     a_eta = 1.0,
     b_eta = 1.0,
-    a_gam = 1.0,
-    b_gam = 1.0
+    a_gamma = 1.0,
+    b_gamma = 1.0
 ){
   list(
     type = "density",
     subtype = "UniformMixtureModel",
+    extract_function = extract_uniformmix_chains,
+    requires_stickbreaking = TRUE,
     parameters = list(
       list(
         julia_name = "n_component",
@@ -372,16 +425,25 @@ build_uniformmix_config <- function(
       ),
       list(
         julia_name = "a_γ",
-        value = a_gam,
+        value = a_gamma,
         type = "float",
-        default = a_gam == formals(build_uniformmix_config)$a_gam
+        default = a_gamma == formals(build_uniformmix_config)$a_gamma
       ),
       list(
         julia_name = "b_γ",
-        value = b_gam,
+        value = b_gamma,
         type = "float",
-        default = b_gam == formals(build_uniformmix_config)$b_gam
+        default = b_gamma == formals(build_uniformmix_config)$b_gamma
       )
     )
   )
+}
+
+extract_uniformmix_chains <- function(julia){
+  chains <- list()
+  chains$theta = julia$eval('density_output.θ')
+  chains$eta_theta = julia$eval('density_output.η_θ')
+  chains$gamma_theta = julia$eval('density_output.γ_θ')
+  chains$omega = julia$eval('density_output.ω')
+  return(chains)
 }

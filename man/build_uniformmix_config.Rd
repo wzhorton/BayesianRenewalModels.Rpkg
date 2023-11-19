@@ -8,8 +8,8 @@ build_uniformmix_config(
   n_component,
   a_eta = 1,
   b_eta = 1,
-  a_gam = 1,
-  b_gam = 1
+  a_gamma = 1,
+  b_gamma = 1
 )
 }
 \arguments{
@@ -17,7 +17,7 @@ build_uniformmix_config(
 
 \item{a_eta, b_eta}{inverse gamma shape hyperparameters}
 
-\item{a_gam, b_gam}{inverse gamma scale hyperparameters}
+\item{a_gamma, b_gamma}{inverse gamma scale hyperparameters}
 }
 \value{
 list containing metadata and relevant parameter info

@@ -7,11 +7,11 @@
 build_gammamix_config(
   n_component,
   a_kappa = 3,
-  a_gam_kappa = 1,
-  b_gam_kappa = 1,
-  a_lam = 2.1,
-  a_gam_lam = 1,
-  b_gam_lam = 1
+  a_gamma_kappa = 1,
+  b_gamma_kappa = 1,
+  a_lambda = 2.1,
+  a_gamma_lambda = 1,
+  b_gamma_lambda = 1
 )
 }
 \arguments{
@@ -19,11 +19,11 @@ build_gammamix_config(
 
 \item{a_kappa}{gamma kernel shape prior}
 
-\item{a_gam_kappa, b_gam_kappa}{gamma kernel shape hyperparameters}
+\item{a_gamma_kappa, b_gamma_kappa}{gamma kernel shape hyperparameters}
 
-\item{a_lam}{gamma kernel scale prior}
+\item{a_lambda}{gamma kernel scale prior}
 
-\item{a_gam_lam, b_gam_lam}{gamma kernel scale hyperparameters}
+\item{a_gamma_lambda, b_gamma_lambda}{gamma kernel scale hyperparameters}
 }
 \value{
 list containing metadata and relevant parameter info

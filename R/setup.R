@@ -8,7 +8,7 @@
 #' @return A \code{JuliaCall} object which interfaces to a Julia session.
 #' @export
 
-build_julia_interface <- function(install_julia = FALSE){
+julia_interface <- function(install_julia = FALSE){
   julia <- JuliaCall::julia_setup(installJulia = install_julia, rebuild = TRUE)
   julia$command("using Pkg")
   julia$call("Pkg.activate", system.file("./julia/BayesianRenewalModels.jl/",
