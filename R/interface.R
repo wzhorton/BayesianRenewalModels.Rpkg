@@ -17,6 +17,8 @@ nondefault_config_string <- function(config, function_name = config$subtype){
         formatted_value <- as.character(parm$value)
       } else if(parm$type == "bool"){
         formatted_value <- ifelse(parm$value, "true", "false")
+      } else if(parm$type == "raw"){
+        formatted_value <- as.character(parm$value)
       }
       output_command <- paste0(
         output_command, parm$julia_name, "=", formatted_value,", "
@@ -47,8 +49,11 @@ nondefault_config_string <- function(config, function_name = config$subtype){
 #' @param n_iteration,n_burnin,n_thin MCMC sampling output variables
 #' @param n_dendsity_eval,n_kfunction_eval grid size for function evaluation.
 #'  K-function only applies to HRP process models
-#' @param eval_factor multiplier fot upper bound of evaluation grid
+#' @param eval_factor multiplier for upper bound of evaluation grid
 #'  (normally at max(sojourns))
+#'.@param first_eval_factor adjustment for first value in evaluation grid.
+#'  A value of 1 results in an even grid, while values <1 lead to lower
+#'  initial values.
 #' @param save_hazard,save_kfunction indicate whether to save these functions.
 #'  K-function only applies to HRP process models
 #' @param verbose indicates whether to display sampling progress messages
@@ -68,6 +73,7 @@ fit_renewal_model <- function(
     n_density_eval = 100,
     n_kfunction_eval = 30,
     eval_factor = 1.0,
+    first_eval_factor = 1.0,
     save_hazard = FALSE,
     save_kfunction = FALSE,
     verbose = TRUE
@@ -112,6 +118,12 @@ fit_renewal_model <- function(
           value = eval_factor,
           type = "float",
           default = eval_factor == formals(fit_renewal_model)$eval_factor
+        ),
+        list(
+          julia_name = "first_eval_factor",
+          value = first_eval_factor,
+          type = "raw",
+          default = first_eval_factor == formals(fit_renewal_model)$first_eval_factor
         ),
         list(
           julia_name = "save_hazard",

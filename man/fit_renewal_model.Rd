@@ -19,6 +19,7 @@ fit_renewal_model(
   n_density_eval = 100,
   n_kfunction_eval = 30,
   eval_factor = 1,
+  first_eval_factor = 1,
   save_hazard = FALSE,
   save_kfunction = FALSE,
   verbose = TRUE
@@ -45,8 +46,11 @@ DPSB, LogitSB, DSLogitSB. Is only required for mixture density models}
 
 \item{n_iteration, n_burnin, n_thin}{MCMC sampling output variables}
 
-\item{eval_factor}{multiplier fot upper bound of evaluation grid
-(normally at max(sojourns))}
+\item{eval_factor}{multiplier for upper bound of evaluation grid
+(normally at max(sojourns))
+.@param first_eval_factor adjustment for first value in evaluation grid.
+A value of 1 results in an even grid, while values <1 lead to lower
+initial values.}
 
 \item{save_hazard, save_kfunction}{indicate whether to save these functions.
 K-function only applies to HRP process models}
