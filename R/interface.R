@@ -57,6 +57,7 @@ nondefault_config_string <- function(config, function_name = config$subtype){
 #' @param save_hazard,save_kfunction indicate whether to save these functions.
 #'  K-function only applies to HRP process models
 #' @param verbose indicates whether to display sampling progress messages
+#' @param display_call indicate whether to print the function call generated
 #' @export
 fit_renewal_model <- function(
     julia,
@@ -72,11 +73,14 @@ fit_renewal_model <- function(
     n_thin = 1,
     n_density_eval = 100,
     n_kfunction_eval = 30,
+    n_first_passage_eval = 30,
     eval_factor = 1.0,
     first_eval_factor = 1.0,
     save_hazard = FALSE,
     save_kfunction = FALSE,
-    verbose = TRUE
+    save_first_passage = FALSE,
+    verbose = TRUE,
+    display_call = FALSE
 ){
     process_string <- paste0(nondefault_config_string(process_config), ", ")
     density_string <- paste0(nondefault_config_string(density_config), ", ")
@@ -162,8 +166,20 @@ fit_renewal_model <- function(
         list(
           julia_name = "initial_state",
           value = initial_state,
-          type = "bool",
+          type = "int",
           default = save_kfunction == formals(fit_renewal_model)$save_kfunction
+        ),
+        list(
+          julia_name = "save_first_passage",
+          value = save_first_passage,
+          type = "bool",
+          default = save_first_passage == formals(fit_renewal_model)$save_first_passage
+        ),
+        list(
+          julia_name = "n_first_passage_eval",
+          value = n_first_passage_eval,
+          type = "int",
+          default = n_first_passage_eval == formals(fit_renewal_model)$n_first_passage_eval
         )
       ))
     }
@@ -175,7 +191,7 @@ fit_renewal_model <- function(
       julia$assign("interarrivals", sojourns)
     }else if(process_config$subtype == "MRP"){
       julia$assign("sojourns", sojourns)
-      julia$assign("states", states)
+      julia$assign("states", as.integer(states))
     }
 
     # construct command
@@ -192,12 +208,16 @@ fit_renewal_model <- function(
       stickbreaking_string
     )
     if(process_config$subtype == "HRP"){
-      function_call <- paste0(function_call, "interarrivals, max_time, ")
+      function_call <- paste0(function_call, "interarrivals, max_time; ")
     } else if(process_config$subtype == "MRP"){
-      function_call <- paste0(function_call, "sojourns, states, max_time, ")
+      function_call <- paste0(function_call, "sojourns, states, max_time; ")
     }
     function_call <- paste0(function_call, output_config_string,")")
 
+    # optionally display function call
+    if(display_call){
+      print(function_call)
+    }
     # run command and collect results
     julia$command(function_call, show_value = FALSE)
     chains <- c(

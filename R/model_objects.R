@@ -57,8 +57,10 @@ extract_mrp_chains <- function(julia){
   chains <- list()
   chains$p = julia$eval('process_output.p')
   chains$eval_x = julia$eval('process_output.eval_x')
+  chains$eval_xfp = julia$eval('process_output.eval_xfp')
   chains$density = julia$eval('process_output.density')
   chains$hazard = julia$eval('process_output.hazard')
+  chains$first_passage = julia$eval('process_output.first_passage')
   return(chains)
 }
 

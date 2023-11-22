@@ -18,11 +18,14 @@ fit_renewal_model(
   n_thin = 1,
   n_density_eval = 100,
   n_kfunction_eval = 30,
+  n_first_passage_eval = 30,
   eval_factor = 1,
   first_eval_factor = 1,
   save_hazard = FALSE,
   save_kfunction = FALSE,
-  verbose = TRUE
+  save_first_passage = FALSE,
+  verbose = TRUE,
+  display_call = FALSE
 )
 }
 \arguments{
@@ -56,6 +59,8 @@ initial values.}
 K-function only applies to HRP process models}
 
 \item{verbose}{indicates whether to display sampling progress messages}
+
+\item{display_call}{indicate whether to print the function call generated}
 
 \item{n_dendsity_eval, n_kfunction_eval}{grid size for function evaluation.
 K-function only applies to HRP process models}
