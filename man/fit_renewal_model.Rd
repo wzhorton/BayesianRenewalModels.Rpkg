@@ -24,6 +24,7 @@ fit_renewal_model(
   save_hazard = FALSE,
   save_kfunction = FALSE,
   save_first_passage = FALSE,
+  save_ecdf_error = FALSE,
   verbose = TRUE,
   display_call = FALSE
 )
@@ -57,6 +58,9 @@ initial values.}
 
 \item{save_hazard, save_kfunction}{indicate whether to save these functions.
 K-function only applies to HRP process models}
+
+\item{save_ecdf_error}{indicate whether to save the empirical cdf minus
+modeled cdf squared error for HRP models}
 
 \item{verbose}{indicates whether to display sampling progress messages}
 

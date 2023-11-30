@@ -4,12 +4,24 @@
 \alias{build_logitsb_config}
 \title{LogitSB config builder}
 \usage{
-build_logitsb_config(m_mu = 0, s_mu = 1000, a_sig2 = 1, b_sig2 = 1)
+build_logitsb_config(
+  m_mu = 0,
+  s_mu = 1000,
+  a_sig2 = 1,
+  b_sig2 = 1,
+  init_mu = 0,
+  init_sig2 = 1,
+  sample_mu = TRUE,
+  sample_sig2 = TRUE
+)
 }
 \arguments{
-\item{m_mu, s_mulogit}{stick-breaking mean hyperparameters}
+\item{m_mu, s_mu}{logit stick-breaking mean hyperparameters}
 
 \item{a_sig2, b_sig2}{logit stick-breaking variance hyperparameters}
+
+\item{init_mu, init_sig2}{initial values for mu and sig2
+#' @param sample_mu,sample_sig2 indicate whether they should be sampled}
 }
 \value{
 list containing metadata and relevant parameter info

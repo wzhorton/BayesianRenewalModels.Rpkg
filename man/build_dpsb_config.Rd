@@ -4,10 +4,19 @@
 \alias{build_dpsb_config}
 \title{DPSB config builder}
 \usage{
-build_dpsb_config(a_alpha = 5, b_alpha = 1)
+build_dpsb_config(
+  a_alpha = 5,
+  b_alpha = 1,
+  init_alpha = 1,
+  sample_alpha = TRUE
+)
 }
 \arguments{
 \item{a_alpha, b_alpha}{DP concentration hyperparameters}
+
+\item{init_alpha}{initial value for alpha}
+
+\item{sample_alpha}{logical value for whether alpha should be sampled (or fixed)}
 }
 \value{
 list containing metadata and relevant parameter info

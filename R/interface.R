@@ -56,6 +56,8 @@ nondefault_config_string <- function(config, function_name = config$subtype){
 #'  initial values.
 #' @param save_hazard,save_kfunction indicate whether to save these functions.
 #'  K-function only applies to HRP process models
+#' @param save_ecdf_error indicate whether to save the empirical cdf minus
+#' modeled cdf squared error for HRP models
 #' @param verbose indicates whether to display sampling progress messages
 #' @param display_call indicate whether to print the function call generated
 #' @export
@@ -79,6 +81,7 @@ fit_renewal_model <- function(
     save_hazard = FALSE,
     save_kfunction = FALSE,
     save_first_passage = FALSE,
+    save_ecdf_error = FALSE,
     verbose = TRUE,
     display_call = FALSE
 ){
@@ -152,6 +155,12 @@ fit_renewal_model <- function(
           value = save_kfunction,
           type = "bool",
           default = save_kfunction == formals(fit_renewal_model)$save_kfunction
+        ),
+        list(
+          julia_name = "save_ecdf_error",
+          value = save_ecdf_error,
+          type = "bool",
+          default = save_ecdf_error == formals(fit_renewal_model)$save_ecdf_error
         ),
         list(
           julia_name = "n_kfunction_eval",

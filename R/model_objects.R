@@ -27,6 +27,7 @@ extract_hrp_chains <- function(julia){
   chains$density = julia$eval('process_output.density')
   chains$hazard = julia$eval('process_output.hazard')
   chains$kfunction = julia$eval('process_output.kfunction')
+  chains$ecdf_error = julia$eval('process_output.ecdf_error')
   return(chains)
 }
 
@@ -74,9 +75,13 @@ extract_mrp_chains <- function(julia){
 #' Dirichlet Process Stick-Breaking (DPSB)
 #'
 #' @param a_alpha,b_alpha DP concentration hyperparameters
+#' @param init_alpha initial value for alpha
+#' @param sample_alpha logical value for whether alpha should be sampled (or fixed)
 #' @return list containing metadata and relevant parameter info
 #' @export
-build_dpsb_config <- function(a_alpha = 5.0, b_alpha = 1.0){
+build_dpsb_config <- function(
+    a_alpha = 5.0, b_alpha = 1.0, init_alpha = 1.0, sample_alpha = TRUE
+){
   list(
     type = "stickbreaking",
     subtype = "DPSB",
@@ -93,6 +98,18 @@ build_dpsb_config <- function(a_alpha = 5.0, b_alpha = 1.0){
         value = b_alpha,
         type = "float",
         default = b_alpha == formals(build_dpsb_config)$b_alpha
+      ),
+      list(
+        julia_name = "init_α",
+        value = init_alpha,
+        type = "float",
+        default = init_alpha == formals(build_dpsb_config)$init_alpha
+      ),
+      list(
+        julia_name = "sample_α",
+        value = sample_alpha,
+        type = "bool",
+        default = sample_alpha == formals(build_dpsb_config)$sample_alpha
       )
     )
   )
@@ -108,11 +125,16 @@ extract_dpsb_chains <- function(julia){
 #'
 #' Logit Stick-Breaking (LogitSB)
 #'
-#' @param m_mu,s_mulogit stick-breaking mean hyperparameters
+#' @param m_mu,s_mu logit stick-breaking mean hyperparameters
 #' @param a_sig2,b_sig2 logit stick-breaking variance hyperparameters
+#' @param init_mu,init_sig2 initial values for mu and sig2
+#' #' @param sample_mu,sample_sig2 indicate whether they should be sampled
 #' @return list containing metadata and relevant parameter info
 #' @export
-build_logitsb_config <- function(m_mu = 0.0, s_mu = 1000.0, a_sig2 = 1.0, b_sig2 = 1.0){
+build_logitsb_config <- function(
+    m_mu = 0.0, s_mu = 1000.0, a_sig2 = 1.0, b_sig2 = 1.0,
+    init_mu = 0.0, init_sig2 = 1.0, sample_mu = TRUE, sample_sig2 = TRUE
+){
   list(
     type = "stickbreaking",
     subtype = "LogitSB",
@@ -141,6 +163,30 @@ build_logitsb_config <- function(m_mu = 0.0, s_mu = 1000.0, a_sig2 = 1.0, b_sig2
         value = b_sig2,
         type = "float",
         default = b_sig2 == formals(build_logitsb_config)$b_sig2
+      ),
+      list(
+        julia_name = "init_μ",
+        value = init_mu,
+        type = "float",
+        default = init_mu == formals(build_logitsb_config)$init_mu
+      ),
+      list(
+        julia_name = "init_σ",
+        value = init_sig2,
+        type = "float",
+        default = init_sig2 == formals(build_logitsb_config)$init_sig2
+      ),
+      list(
+        julia_name = "sample_μ",
+        value = sample_mu,
+        type = "bool",
+        default = sample_mu == formals(build_logitsb_config)$sample_mu
+      ),
+      list(
+        julia_name = "sample_σ",
+        value = sample_sig2,
+        type = "bool",
+        default = sample_sig2 == formals(build_logitsb_config)$sample_sig2
       )
     )
   )
