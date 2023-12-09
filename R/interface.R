@@ -82,6 +82,7 @@ fit_renewal_model <- function(
     save_kfunction = FALSE,
     save_first_passage = FALSE,
     save_ecdf_error = FALSE,
+    save_predictive_samples = FALSE,
     verbose = TRUE,
     display_call = FALSE
 ){
@@ -137,6 +138,12 @@ fit_renewal_model <- function(
           value = save_hazard,
           type = "bool",
           default = save_hazard == formals(fit_renewal_model)$save_hazard
+        ),
+        list(
+          julia_name = "save_predictive_samples",
+          value = save_predictive_samples,
+          type = "bool",
+          default = save_predictive_samples == formals(fit_renewal_model)$save_predictive_samples
         ),
         list(
           julia_name = "verbose",

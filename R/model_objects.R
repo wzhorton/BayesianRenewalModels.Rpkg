@@ -28,6 +28,7 @@ extract_hrp_chains <- function(julia){
   chains$hazard = julia$eval('process_output.hazard')
   chains$kfunction = julia$eval('process_output.kfunction')
   chains$ecdf_error = julia$eval('process_output.ecdf_error')
+  chains$predictive_samples = julia$eval('process_output.predictive_samples')
   return(chains)
 }
 
@@ -62,6 +63,8 @@ extract_mrp_chains <- function(julia){
   chains$density = julia$eval('process_output.density')
   chains$hazard = julia$eval('process_output.hazard')
   chains$first_passage = julia$eval('process_output.first_passage')
+  chains$predictive_samples = julia$eval('process_output.predictive_samples')
+  chains$predictive_states = julia$eval('process_output.predictive_states')
   return(chains)
 }
 

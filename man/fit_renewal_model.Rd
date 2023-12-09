@@ -25,6 +25,7 @@ fit_renewal_model(
   save_kfunction = FALSE,
   save_first_passage = FALSE,
   save_ecdf_error = FALSE,
+  save_predictive_samples = FALSE,
   verbose = TRUE,
   display_call = FALSE
 )
