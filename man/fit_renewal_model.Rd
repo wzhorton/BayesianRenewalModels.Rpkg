@@ -17,15 +17,18 @@ fit_renewal_model(
   n_burnin = 1000,
   n_thin = 1,
   n_density_eval = 100,
-  n_kfunction_eval = 30,
-  n_first_passage_eval = 30,
-  eval_factor = 1,
   first_eval_factor = 1,
+  last_eval_factor = 1,
   save_hazard = FALSE,
   save_kfunction = FALSE,
-  save_first_passage = FALSE,
-  save_ecdf_error = FALSE,
+  n_kfunction_eval = 30,
+  save_ecdf_model_error = FALSE,
+  n_segments_per_eval = 10,
+  save_first_passage_density = FALSE,
+  n_first_passage_eval = 100,
   save_predictive_samples = FALSE,
+  save_predictive_state_recurrence_ecdf = FALSE,
+  n_ecdf_eval = 100,
   verbose = TRUE,
   display_call = FALSE
 )
@@ -51,24 +54,38 @@ DPSB, LogitSB, DSLogitSB. Is only required for mixture density models}
 
 \item{n_iteration, n_burnin, n_thin}{MCMC sampling output variables}
 
-\item{eval_factor}{multiplier for upper bound of evaluation grid
-(normally at max(sojourns))
-.@param first_eval_factor adjustment for first value in evaluation grid.
-A value of 1 results in an even grid, while values <1 lead to lower
-initial values.}
+\item{n_density_eval}{grid size for the density function evaluation}
 
-\item{save_hazard, save_kfunction}{indicate whether to save these functions.
-K-function only applies to HRP process models}
+\item{first_eval_factor, last_eval_factor}{multiplicative adjustments for density
+evaluation grid, which defaults to evenly spaced from zero to the max datapoint.}
 
-\item{save_ecdf_error}{indicate whether to save the empirical cdf minus
-modeled cdf squared error for HRP models}
+\item{save_hazard}{logical indicating that the hazard inference should be computed.
+Matches the dimensionality of the density inference.}
+
+\item{save_kfunction, n_kfunction_eval}{configuration indicating whether the HRP
+K-function should be computed and how dense the grid should be. The bounds
+will match the density.}
+
+\item{save_ecdf_model_error, n_segments_per_eval}{configuration indicating whether
+the HRP ECDF model error should be computed and how many evaluations between
+observations.}
+
+\item{save_first_passage_density, n_first_passage_eval}{configuration indicating
+whether the first passage densities for MRP models should be computed and how
+dense the evaluation grid should be. The grid defaults to going from the minimum
+of the density grid and the maximum observed state recurrence time.}
+
+\item{save_predictive_samples}{indicates whether a complete predictive
+dataset should be generated for each iteration. States are also saved for
+MRP models.}
+
+\item{save_predictive_state_recurrence_ecdf, n_ecdf_eval}{configuration for
+whether to compute ecdf evaluations and ecdf errors from the predictive
+samples.}
 
 \item{verbose}{indicates whether to display sampling progress messages}
 
 \item{display_call}{indicate whether to print the function call generated}
-
-\item{n_dendsity_eval, n_kfunction_eval}{grid size for function evaluation.
-K-function only applies to HRP process models}
 }
 \description{
 Given a certain configuration setup, passes relevant data to julia, runs the

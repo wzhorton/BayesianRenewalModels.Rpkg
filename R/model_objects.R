@@ -27,7 +27,7 @@ extract_hrp_chains <- function(julia){
   chains$density = julia$eval('process_output.density')
   chains$hazard = julia$eval('process_output.hazard')
   chains$kfunction = julia$eval('process_output.kfunction')
-  chains$ecdf_error = julia$eval('process_output.ecdf_error')
+  chains$ecdf_model_error = julia$eval('process_output.ecdf_model_error')
   chains$predictive_samples = as.list(julia$eval('process_output.predictive_samples'))
   return(chains)
 }
@@ -60,11 +60,15 @@ extract_mrp_chains <- function(julia){
   chains$p = julia$eval('process_output.p')
   chains$eval_x = julia$eval('process_output.eval_x')
   chains$eval_xfp = julia$eval('process_output.eval_xfp')
+  chains$eval_xpsr = julia$eval('process_output.eval_xpsr')
   chains$density = julia$eval('process_output.density')
   chains$hazard = julia$eval('process_output.hazard')
-  chains$first_passage = julia$eval('process_output.first_passage')
+  chains$first_passage_density = julia$eval('process_output.first_passage_density')
   chains$predictive_samples = as.list(julia$eval('process_output.predictive_samples'))
   chains$predictive_states = as.list(julia$eval('process_output.predictive_states'))
+  chains$state_recurrence_ecdf = julia$eval("process_output.state_recurrence_ecdf")
+  chains$predictive_state_recurrence_ecdf = julia$eval("process_output.predictive_state_recurrence_ecdf")
+  chains$predictive_state_recurrence_ecdf_error = julia$eval("process_output.predictive_state_recurrence_ecdf_error")
   return(chains)
 }
 

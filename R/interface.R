@@ -47,17 +47,27 @@ nondefault_config_string <- function(config, function_name = config$subtype){
 #' @param states integer vector of states for MRP process models
 #' @param initial_state integer value indicating initial state for MRP process models
 #' @param n_iteration,n_burnin,n_thin MCMC sampling output variables
-#' @param n_dendsity_eval,n_kfunction_eval grid size for function evaluation.
-#'  K-function only applies to HRP process models
-#' @param eval_factor multiplier for upper bound of evaluation grid
-#'  (normally at max(sojourns))
-#'.@param first_eval_factor adjustment for first value in evaluation grid.
-#'  A value of 1 results in an even grid, while values <1 lead to lower
-#'  initial values.
-#' @param save_hazard,save_kfunction indicate whether to save these functions.
-#'  K-function only applies to HRP process models
-#' @param save_ecdf_error indicate whether to save the empirical cdf minus
-#' modeled cdf squared error for HRP models
+#' @param n_density_eval grid size for the density function evaluation
+#' @param first_eval_factor,last_eval_factor multiplicative adjustments for density
+#' evaluation grid, which defaults to evenly spaced from zero to the max datapoint.
+#' @param save_hazard logical indicating that the hazard inference should be computed.
+#' Matches the dimensionality of the density inference.
+#' @param save_kfunction,n_kfunction_eval configuration indicating whether the HRP
+#' K-function should be computed and how dense the grid should be. The bounds
+#' will match the density.
+#' @param save_ecdf_model_error,n_segments_per_eval configuration indicating whether
+#' the HRP ECDF model error should be computed and how many evaluations between
+#' observations.
+#' @param save_first_passage_density,n_first_passage_eval configuration indicating
+#' whether the first passage densities for MRP models should be computed and how
+#' dense the evaluation grid should be. The grid defaults to going from the minimum
+#' of the density grid and the maximum observed state recurrence time.
+#' @param save_predictive_samples indicates whether a complete predictive
+#' dataset should be generated for each iteration. States are also saved for
+#' MRP models.
+#' @param save_predictive_state_recurrence_ecdf,n_ecdf_eval configuration for
+#' whether to compute ecdf evaluations and ecdf errors from the predictive
+#' samples.
 #' @param verbose indicates whether to display sampling progress messages
 #' @param display_call indicate whether to print the function call generated
 #' @export
@@ -74,15 +84,18 @@ fit_renewal_model <- function(
     n_burnin = 1000,
     n_thin = 1,
     n_density_eval = 100,
-    n_kfunction_eval = 30,
-    n_first_passage_eval = 30,
-    eval_factor = 1.0,
     first_eval_factor = 1.0,
+    last_eval_factor = 1.0,
     save_hazard = FALSE,
     save_kfunction = FALSE,
-    save_first_passage = FALSE,
-    save_ecdf_error = FALSE,
+    n_kfunction_eval = 30,
+    save_ecdf_model_error = FALSE,
+    n_segments_per_eval = 10,
+    save_first_passage_density = FALSE,
+    n_first_passage_eval = 100,
     save_predictive_samples = FALSE,
+    save_predictive_state_recurrence_ecdf = FALSE,
+    n_ecdf_eval = 100,
     verbose = TRUE,
     display_call = FALSE
 ){
@@ -122,28 +135,16 @@ fit_renewal_model <- function(
           default = n_density_eval == formals(fit_renewal_model)$n_density_eval
         ),
         list(
-          julia_name = "eval_factor",
-          value = eval_factor,
-          type = "float",
-          default = eval_factor == formals(fit_renewal_model)$eval_factor
-        ),
-        list(
           julia_name = "first_eval_factor",
           value = first_eval_factor,
           type = "raw",
           default = first_eval_factor == formals(fit_renewal_model)$first_eval_factor
         ),
         list(
-          julia_name = "save_hazard",
-          value = save_hazard,
-          type = "bool",
-          default = save_hazard == formals(fit_renewal_model)$save_hazard
-        ),
-        list(
-          julia_name = "save_predictive_samples",
-          value = save_predictive_samples,
-          type = "bool",
-          default = save_predictive_samples == formals(fit_renewal_model)$save_predictive_samples
+          julia_name = "last_eval_factor",
+          value = last_eval_factor,
+          type = "float",
+          default = last_eval_factor == formals(fit_renewal_model)$last_eval_factor
         ),
         list(
           julia_name = "verbose",
@@ -155,28 +156,28 @@ fit_renewal_model <- function(
     )
 
     # append additional arguments based on model configs
-    if(process_config$subtype == "HRP"){
-      output_config$parameters <- append(output_config$parameters, list(
-        list(
-          julia_name = "save_kfunction",
-          value = save_kfunction,
-          type = "bool",
-          default = save_kfunction == formals(fit_renewal_model)$save_kfunction
-        ),
-        list(
-          julia_name = "save_ecdf_error",
-          value = save_ecdf_error,
-          type = "bool",
-          default = save_ecdf_error == formals(fit_renewal_model)$save_ecdf_error
-        ),
-        list(
-          julia_name = "n_kfunction_eval",
-          value = n_kfunction_eval,
-          type = "int",
-          default = n_kfunction_eval == formals(fit_renewal_model)$n_kfunction_eval
-        )
-      ))
-    }
+    # if(process_config$subtype == "HRP"){
+    #   output_config$parameters <- append(output_config$parameters, list(
+    #     list(
+    #       julia_name = "save_kfunction",
+    #       value = save_kfunction,
+    #       type = "bool",
+    #       default = save_kfunction == formals(fit_renewal_model)$save_kfunction
+    #     ),
+    #     list(
+    #       julia_name = "save_ecdf_error",
+    #       value = save_ecdf_error,
+    #       type = "bool",
+    #       default = save_ecdf_error == formals(fit_renewal_model)$save_ecdf_error
+    #     ),
+    #     list(
+    #       julia_name = "n_kfunction_eval",
+    #       value = n_kfunction_eval,
+    #       type = "int",
+    #       default = n_kfunction_eval == formals(fit_renewal_model)$n_kfunction_eval
+    #     )
+    #   ))
+    # }
     if(process_config$subtype == "MRP"){
       output_config$parameters <- append(output_config$parameters, list(
         list(
@@ -184,19 +185,19 @@ fit_renewal_model <- function(
           value = initial_state,
           type = "int",
           default = save_kfunction == formals(fit_renewal_model)$save_kfunction
-        ),
-        list(
-          julia_name = "save_first_passage",
-          value = save_first_passage,
-          type = "bool",
-          default = save_first_passage == formals(fit_renewal_model)$save_first_passage
-        ),
-        list(
-          julia_name = "n_first_passage_eval",
-          value = n_first_passage_eval,
-          type = "int",
-          default = n_first_passage_eval == formals(fit_renewal_model)$n_first_passage_eval
-        )
+        )#,
+        # list(
+        #   julia_name = "save_first_passage",
+        #   value = save_first_passage,
+        #   type = "bool",
+        #   default = save_first_passage == formals(fit_renewal_model)$save_first_passage
+        # ),
+        # list(
+        #   julia_name = "n_first_passage_eval",
+        #   value = n_first_passage_eval,
+        #   type = "int",
+        #   default = n_first_passage_eval == formals(fit_renewal_model)$n_first_passage_eval
+        # )
       ))
     }
     output_config_string <- nondefault_config_string(output_config)
@@ -217,8 +218,7 @@ fit_renewal_model <- function(
     }
 
     function_call <- paste0(
-      unpack,
-      " = fit_renewal_model(",
+      "tuple_output = fit_renewal_model(",
       process_string,
       density_string,
       stickbreaking_string
@@ -234,8 +234,86 @@ fit_renewal_model <- function(
     if(display_call){
       print(function_call)
     }
-    # run command and collect results
+
+    # run command and higher order inferences
     julia$command(function_call, show_value = FALSE)
+    julia$command(paste0(unpack, " = tuple_output"), show_value = FALSE)
+    if(save_hazard){
+      julia$command(
+        paste0(
+          "save_hazard!(tuple_output...; verbose = ",
+          ifelse(verbose, "true", "false"),
+          ")"
+        ),
+        show_value = FALSE
+      )
+    }
+    if(save_kfunction && process_config$subtype == "HRP"){
+      julia$command(
+        paste0(
+          "save_kfunction!(tuple_output...; n_kfunction_eval = ",
+          n_kfunction_eval,
+          ", verbose = ",
+          ifelse(verbose, "true", "false"),
+          ")"
+        ),
+        show_value = FALSE
+      )
+    }
+    if(save_ecdf_model_error && process_config$subtype == "HRP"){
+      julia$command(
+        paste0(
+          "save_ecdf_model_error!(interarrivals, tuple_output...; n_segments_per_eval = ",
+          n_segments_per_eval,
+          ", verbose = ",
+          ifelse(verbose, "true", "false"),
+          ")"
+        ),
+        show_value = FALSE
+      )
+    }
+    if(save_first_passage_density && process_config$subtype == "MRP"){
+      julia$command(
+        paste0(
+          "save_first_passage_density!(sojourns, states, ",
+          initial_state,
+          ", tuple_output...; n_first_passage_eval = ",
+          n_first_passage_eval,
+          ", verbose = ",
+          ifelse(verbose, "true", "false"),
+          ")"
+        ),
+        show_value = FALSE
+      )
+    }
+    if(save_predictive_samples){
+      julia$command(
+        paste0(
+          "save_predictive_samples!(max_time, ",
+          ifelse(process_config$subtype != "MRP", "",
+                 paste0(initial_state,", ")),
+          "tuple_output...; verbose = ",
+          ifelse(verbose, "true", "false"),
+          ")"
+        ),
+        show_value = FALSE
+      )
+    }
+    if(save_predictive_state_recurrence_ecdf && save_predictive_samples && process_config$subtype == "MRP"){
+      julia$command(
+        paste0(
+          "save_predictive_state_recurrence_ecdf!(sojourns, states, ",
+          initial_state,
+          ", tuple_output...; n_ecdf_eval = ",
+          n_ecdf_eval,
+          ", verbose = ",
+          ifelse(verbose, "true", "false"),
+          ")"
+        )
+      )
+    }
+
+    # collect results
     chains <- c(
       process_config$extract_function(julia),
       density_config$extract_function(julia)
