@@ -1,6 +1,6 @@
 Package: BayesianRenewalModels
 Title: Bayesian nonparametric renewal modeling methods
-Version: 2.0.0
+Version: 2.0.1
 Authors@R: person("Zach", "Horton", email = "whorton@ucsc.edu", role = c("aut", "cre"))
 Description: Wrapper library for the BayesianRenewalModels.jl Julia package.
 License: GPL-3
