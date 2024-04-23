@@ -24,8 +24,6 @@ fit_renewal_model(
   n_kfunction_eval = 30,
   save_ecdf_model_error = FALSE,
   n_segments_per_eval = 10,
-  save_first_passage_density = FALSE,
-  n_first_passage_eval = 100,
   save_predictive_samples = FALSE,
   save_predictive_state_recurrence_ecdf = FALSE,
   n_ecdf_eval = 100,
@@ -69,11 +67,6 @@ will match the density.}
 \item{save_ecdf_model_error, n_segments_per_eval}{configuration indicating whether
 the HRP ECDF model error should be computed and how many evaluations between
 observations.}
-
-\item{save_first_passage_density, n_first_passage_eval}{configuration indicating
-whether the first passage densities for MRP models should be computed and how
-dense the evaluation grid should be. The grid defaults to going from the minimum
-of the density grid and the maximum observed state recurrence time.}
 
 \item{save_predictive_samples}{indicates whether a complete predictive
 dataset should be generated for each iteration. States are also saved for

@@ -58,10 +58,6 @@ nondefault_config_string <- function(config, function_name = config$subtype){
 #' @param save_ecdf_model_error,n_segments_per_eval configuration indicating whether
 #' the HRP ECDF model error should be computed and how many evaluations between
 #' observations.
-#' @param save_first_passage_density,n_first_passage_eval configuration indicating
-#' whether the first passage densities for MRP models should be computed and how
-#' dense the evaluation grid should be. The grid defaults to going from the minimum
-#' of the density grid and the maximum observed state recurrence time.
 #' @param save_predictive_samples indicates whether a complete predictive
 #' dataset should be generated for each iteration. States are also saved for
 #' MRP models.
@@ -91,8 +87,6 @@ fit_renewal_model <- function(
     n_kfunction_eval = 30,
     save_ecdf_model_error = FALSE,
     n_segments_per_eval = 10,
-    save_first_passage_density = FALSE,
-    n_first_passage_eval = 100,
     save_predictive_samples = FALSE,
     save_predictive_state_recurrence_ecdf = FALSE,
     n_ecdf_eval = 100,
@@ -185,19 +179,7 @@ fit_renewal_model <- function(
           value = initial_state,
           type = "int",
           default = save_kfunction == formals(fit_renewal_model)$save_kfunction
-        )#,
-        # list(
-        #   julia_name = "save_first_passage",
-        #   value = save_first_passage,
-        #   type = "bool",
-        #   default = save_first_passage == formals(fit_renewal_model)$save_first_passage
-        # ),
-        # list(
-        #   julia_name = "n_first_passage_eval",
-        #   value = n_first_passage_eval,
-        #   type = "int",
-        #   default = n_first_passage_eval == formals(fit_renewal_model)$n_first_passage_eval
-        # )
+        )
       ))
     }
     output_config_string <- nondefault_config_string(output_config)
@@ -265,20 +247,6 @@ fit_renewal_model <- function(
         paste0(
           "save_ecdf_model_error!(interarrivals, tuple_output...; n_segments_per_eval = ",
           n_segments_per_eval,
-          ", verbose = ",
-          ifelse(verbose, "true", "false"),
-          ")"
-        ),
-        show_value = FALSE
-      )
-    }
-    if(save_first_passage_density && process_config$subtype == "MRP"){
-      julia$command(
-        paste0(
-          "save_first_passage_density!(sojourns, states, ",
-          initial_state,
-          ", tuple_output...; n_first_passage_eval = ",
-          n_first_passage_eval,
           ", verbose = ",
           ifelse(verbose, "true", "false"),
           ")"

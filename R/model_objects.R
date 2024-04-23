@@ -63,7 +63,6 @@ extract_mrp_chains <- function(julia){
   chains$eval_xpsr = julia$eval('process_output.eval_xpsr')
   chains$density = julia$eval('process_output.density')
   chains$hazard = julia$eval('process_output.hazard')
-  chains$first_passage_density = julia$eval('process_output.first_passage_density')
   chains$predictive_samples = as.list(julia$eval('process_output.predictive_samples'))
   chains$predictive_states = as.list(julia$eval('process_output.predictive_states'))
   chains$state_recurrence_ecdf = julia$eval("process_output.state_recurrence_ecdf")
