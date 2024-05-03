@@ -39,7 +39,7 @@ nondefault_config_string <- function(config, function_name = config$subtype){
 #' @param julia Julia object returned from `build_julia_interface`
 #' @param process_config builder output for renewal process type: HRP, MRP
 #' @param density_config builder output for density model:
-#'  WeibullModel, GammaMixtureModel, UniformMixtureModel
+#'  WeibullModel, GammaMixtureModel, UniformMixtureModel, LogLogisticHazardMixtureModel
 #' @param stickbreaking_config builder output for stick-breaking model:
 #'  DPSB, LogitSB, DSLogitSB. Is only required for mixture density models
 #' @param sojourns vector of sojourn times or inter-arrival times
@@ -150,28 +150,6 @@ fit_renewal_model <- function(
     )
 
     # append additional arguments based on model configs
-    # if(process_config$subtype == "HRP"){
-    #   output_config$parameters <- append(output_config$parameters, list(
-    #     list(
-    #       julia_name = "save_kfunction",
-    #       value = save_kfunction,
-    #       type = "bool",
-    #       default = save_kfunction == formals(fit_renewal_model)$save_kfunction
-    #     ),
-    #     list(
-    #       julia_name = "save_ecdf_error",
-    #       value = save_ecdf_error,
-    #       type = "bool",
-    #       default = save_ecdf_error == formals(fit_renewal_model)$save_ecdf_error
-    #     ),
-    #     list(
-    #       julia_name = "n_kfunction_eval",
-    #       value = n_kfunction_eval,
-    #       type = "int",
-    #       default = n_kfunction_eval == formals(fit_renewal_model)$n_kfunction_eval
-    #     )
-    #   ))
-    # }
     if(process_config$subtype == "MRP"){
       output_config$parameters <- append(output_config$parameters, list(
         list(

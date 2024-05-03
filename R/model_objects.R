@@ -501,3 +501,75 @@ extract_uniformmix_chains <- function(julia){
   chains$omega = julia$eval('density_output.ω')
   return(chains)
 }
+
+#' LogLogisticHazardMixture config builder
+#'
+#' @param n_component number of mixture components
+#' @param R_factor scale basis range by a factor within [0,1].
+#' @param a_sig2,b_sig2 Gaussian process marginal variance parameters
+#' @param m_beta,s_beta Gaussian process mean function parameters
+#' @return list containing metadata and relevant parameter info
+#' @export
+build_llhazardmix_config <- function(
+    n_component,
+    R_factor = 0.9,
+    a_sig2 = 2.1,
+    b_sig2 = 1.0,
+    m_beta = 0.0,
+    s_beta = 1000.0
+){
+  list(
+    type = "density",
+    subtype = "LogLogisticHazardMixtureModel",
+    extract_function = extract_llhazardmix_chains,
+    requires_stickbreaking = FALSE,
+    parameters = list(
+      list(
+        julia_name = "n_component",
+        value = n_component,
+        type = "int",
+        default = FALSE
+      ),
+      list(
+        julia_name = "R_factor",
+        value = R_factor,
+        type = "float",
+        default = R_factor == formals(build_llhazardmix_config)$R_factor
+      ),
+      list(
+        julia_name = "a_σ",
+        value = a_sig2,
+        type = "float",
+        default = a_sig2 == formals(build_llhazardmix_config)$a_sig2
+      ),
+      list(
+        julia_name = "b_σ",
+        value = b_sig2,
+        type = "float",
+        default = b_sig2 == formals(build_llhazardmix_config)$b_sig2
+      ),
+      list(
+        julia_name = "m_β",
+        value = m_beta,
+        type = "float",
+        default = m_beta == formals(build_llhazardmix_config)$m_beta
+      ),
+      list(
+        julia_name = "s_β",
+        value = s_beta,
+        type = "float",
+        default = s_beta == formals(build_llhazardmix_config)$s_beta
+      )
+    )
+  )
+}
+
+extract_llhazardmix_chains <- function(julia){
+  chains <- list()
+  chains$beta0 = julia$eval('density_output.β0')
+  chains$beta1 = julia$eval('density_output.β1')
+  chains$sig2 = julia$eval('density_output.σ')
+  chains$tau = julia$eval('density_output.τ')
+  chains$omega = julia$eval('density_output.ω')
+  return(chains)
+}

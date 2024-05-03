@@ -37,7 +37,7 @@ fit_renewal_model(
 \item{process_config}{builder output for renewal process type: HRP, MRP}
 
 \item{density_config}{builder output for density model:
-WeibullModel, GammaMixtureModel, UniformMixtureModel}
+WeibullModel, GammaMixtureModel, UniformMixtureModel, LogLogisticHazardMixtureModel}
 
 \item{stickbreaking_config}{builder output for stick-breaking model:
 DPSB, LogitSB, DSLogitSB. Is only required for mixture density models}
