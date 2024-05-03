@@ -4,11 +4,14 @@
 \alias{julia_interface}
 \title{Build Julia environment and load \code{BayesianRenewalModels.jl} module.}
 \usage{
-julia_interface(install_julia = FALSE)
+julia_interface(install_julia = FALSE, install_R_dependencies = FALSE)
 }
 \arguments{
 \item{install_julia}{Logical indicating if Julia should be installed in the
 event that an install either is not installed or cannot be found on the path.}
+
+\item{install_R_dependencies}{Logical indicating whether R package dependencies
+used in some Julia routines via RCall.jl should be installed.}
 }
 \value{
 A \code{JuliaCall} object which interfaces to a Julia session.
