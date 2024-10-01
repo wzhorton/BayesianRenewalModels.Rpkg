@@ -17,6 +17,7 @@ fit_renewal_model(
   n_burnin = 1000,
   n_thin = 1,
   n_density_eval = 100,
+  n_intensity_eval = 100,
   first_eval_factor = 1,
   last_eval_factor = 1,
   save_hazard = FALSE,
@@ -34,7 +35,7 @@ fit_renewal_model(
 \arguments{
 \item{julia}{Julia object returned from \code{build_julia_interface}}
 
-\item{process_config}{builder output for renewal process type: HRP, MRP}
+\item{process_config}{builder output for renewal process type: HRP, MRP, ModRP}
 
 \item{density_config}{builder output for density model:
 WeibullModel, GammaMixtureModel, UniformMixtureModel, LogLogisticHazardMixtureModel}
@@ -53,6 +54,8 @@ DPSB, LogitSB, DSLogitSB. Is only required for mixture density models}
 \item{n_iteration, n_burnin, n_thin}{MCMC sampling output variables}
 
 \item{n_density_eval}{grid size for the density function evaluation}
+
+\item{n_intensity_eval}{grid size for the intensity function evaluation}
 
 \item{first_eval_factor, last_eval_factor}{multiplicative adjustments for density
 evaluation grid, which defaults to evenly spaced from zero to the max datapoint.}

@@ -71,6 +71,52 @@ extract_mrp_chains <- function(julia){
   return(chains)
 }
 
+#' ModRP config builder
+#'
+#' Modulated Renewal Process (ModRP)
+#'
+#' @param n_component number of intensity mixture components
+#' @param max_time upper time bound T (duplicate argument)
+#' @return list containing metadata and relevant parameter info
+#' @export
+build_modrp_config <- function(n_component, max_time){
+  list(
+    type = "process",
+    subtype = "ModRP",
+    extract_function = extract_modrp_chains,
+    parameters = list(
+      list(
+        julia_name = "n_component",
+        value = n_component,
+        type = "int",
+        default = FALSE
+      ),
+      list(
+        julia_name = "max_time",
+        value = max_time,
+        type = "float",
+        default = FALSE
+      )
+    )
+  )
+}
+
+extract_modrp_chains <- function(julia){
+  chains <- list()
+  chains$alpha = julia$eval('process_output.α')
+  chains$gamma = julia$eval('process_output.γ')
+  chains$omega_intensity = julia$eval('process_output.ω_intensity')
+  chains$eval_x = julia$eval('process_output.eval_x')
+  chains$eval_t = julia$eval('process_output.eval_t')
+  chains$eval_kx = julia$eval('process_output.eval_kx')
+  chains$density = julia$eval('process_output.density')
+  chains$hazard = julia$eval('process_output.hazard')
+  chains$intensity = julia$eval('process_output.intensity')
+  chains$kfunction = julia$eval('process_output.kfunction')
+  chains$ecdf_model_error = julia$eval('process_output.ecdf_model_error')
+  chains$predictive_samples = as.list(julia$eval('process_output.predictive_samples'))
+  return(chains)
+}
 
 #------------------------------#
 # StickBreakingPriors builders #

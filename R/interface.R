@@ -37,7 +37,7 @@ nondefault_config_string <- function(config, function_name = config$subtype){
 #' appropriate MCMC algorithm, and returns a list of posterior samples.
 #'
 #' @param julia Julia object returned from `build_julia_interface`
-#' @param process_config builder output for renewal process type: HRP, MRP
+#' @param process_config builder output for renewal process type: HRP, MRP, ModRP
 #' @param density_config builder output for density model:
 #'  WeibullModel, GammaMixtureModel, UniformMixtureModel, LogLogisticHazardMixtureModel
 #' @param stickbreaking_config builder output for stick-breaking model:
@@ -48,6 +48,7 @@ nondefault_config_string <- function(config, function_name = config$subtype){
 #' @param initial_state integer value indicating initial state for MRP process models
 #' @param n_iteration,n_burnin,n_thin MCMC sampling output variables
 #' @param n_density_eval grid size for the density function evaluation
+#' @param n_intensity_eval grid size for the intensity function evaluation
 #' @param first_eval_factor,last_eval_factor multiplicative adjustments for density
 #' evaluation grid, which defaults to evenly spaced from zero to the max datapoint.
 #' @param save_hazard logical indicating that the hazard inference should be computed.
@@ -80,6 +81,7 @@ fit_renewal_model <- function(
     n_burnin = 1000,
     n_thin = 1,
     n_density_eval = 100,
+    n_intensity_eval = 100,
     first_eval_factor = 1.0,
     last_eval_factor = 1.0,
     save_hazard = FALSE,
@@ -160,11 +162,21 @@ fit_renewal_model <- function(
         )
       ))
     }
+    if(process_config$subtype == "ModRP"){
+      output_config$parameters <- append(output_config$parameters, list(
+        list(
+          julia_name = "n_intensity_eval",
+          value = n_intensity_eval,
+          type = "int",
+          default = n_intensity_eval == formals(fit_renewal_model)$n_intensity_eval
+        )
+      ))
+    }
     output_config_string <- nondefault_config_string(output_config)
 
     # assign required data elements to julia environment
     julia$assign("max_time", max_time)
-    if(process_config$subtype == "HRP"){
+    if(process_config$subtype %in% c("HRP","ModRP")){
       julia$assign("interarrivals", sojourns)
     }else if(process_config$subtype == "MRP"){
       julia$assign("sojourns", sojourns)
@@ -183,7 +195,7 @@ fit_renewal_model <- function(
       density_string,
       stickbreaking_string
     )
-    if(process_config$subtype == "HRP"){
+    if(process_config$subtype %in% c("HRP", "ModRP")){
       function_call <- paste0(function_call, "interarrivals, max_time; ")
     } else if(process_config$subtype == "MRP"){
       function_call <- paste0(function_call, "sojourns, states, max_time; ")
