@@ -4,12 +4,14 @@
 \alias{build_modrp_config}
 \title{ModRP config builder}
 \usage{
-build_modrp_config(n_component, max_time)
+build_modrp_config(n_component, Lambda, a_alpha = 3, b_alpha = 1)
 }
 \arguments{
 \item{n_component}{number of intensity mixture components}
 
-\item{max_time}{upper time bound T (duplicate argument)}
+\item{Lambda}{total modulating intensity. Values near n are common}
+
+\item{a_alpha, b_alpha}{prior parameter values for Dirichlet process alpha}
 }
 \value{
 list containing metadata and relevant parameter info

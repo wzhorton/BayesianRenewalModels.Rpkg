@@ -76,10 +76,11 @@ extract_mrp_chains <- function(julia){
 #' Modulated Renewal Process (ModRP)
 #'
 #' @param n_component number of intensity mixture components
-#' @param max_time upper time bound T (duplicate argument)
+#' @param Lambda total modulating intensity. Values near n are common
+#' @param a_alpha,b_alpha prior parameter values for Dirichlet process alpha
 #' @return list containing metadata and relevant parameter info
 #' @export
-build_modrp_config <- function(n_component, max_time){
+build_modrp_config <- function(n_component, Lambda, a_alpha = 3.0, b_alpha = 1.0){
   list(
     type = "process",
     subtype = "ModRP",
@@ -92,10 +93,22 @@ build_modrp_config <- function(n_component, max_time){
         default = FALSE
       ),
       list(
-        julia_name = "max_time",
-        value = max_time,
+        julia_name = "Λ",
+        value = Lambda,
         type = "float",
         default = FALSE
+      ),
+      list(
+        julia_name = "a_α",
+        value = a_alpha,
+        type = "float",
+        default = a_alpha == formals(build_modrp_config)$a_alpha
+      ),
+      list(
+        julia_name = "b_α",
+        value = b_alpha,
+        type = "float",
+        default = b_alpha == formals(build_modrp_config)$b_alpha
       )
     )
   )
@@ -104,7 +117,6 @@ build_modrp_config <- function(n_component, max_time){
 extract_modrp_chains <- function(julia){
   chains <- list()
   chains$alpha = julia$eval('process_output.α')
-  chains$gamma = julia$eval('process_output.γ')
   chains$omega_intensity = julia$eval('process_output.ω_intensity')
   chains$eval_x = julia$eval('process_output.eval_x')
   chains$eval_t = julia$eval('process_output.eval_t')
