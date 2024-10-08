@@ -9,7 +9,7 @@ build_modrp_config(n_component, Lambda, a_alpha = 3, b_alpha = 1)
 \arguments{
 \item{n_component}{number of intensity mixture components}
 
-\item{Lambda}{total modulating intensity. Values near n are common}
+\item{Lambda}{total modulating intensity. Values near n are reasonable.}
 
 \item{a_alpha, b_alpha}{prior parameter values for Dirichlet process alpha}
 }

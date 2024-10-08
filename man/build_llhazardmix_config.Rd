@@ -6,7 +6,7 @@
 \usage{
 build_llhazardmix_config(
   n_component,
-  R_factor = 0.9,
+  R_factor = 0.99,
   a_sig2 = 2.1,
   b_sig2 = 1,
   m_beta = 0,

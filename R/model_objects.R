@@ -76,7 +76,7 @@ extract_mrp_chains <- function(julia){
 #' Modulated Renewal Process (ModRP)
 #'
 #' @param n_component number of intensity mixture components
-#' @param Lambda total modulating intensity. Values near n are common
+#' @param Lambda total modulating intensity. Values near n are reasonable.
 #' @param a_alpha,b_alpha prior parameter values for Dirichlet process alpha
 #' @return list containing metadata and relevant parameter info
 #' @export
@@ -570,7 +570,7 @@ extract_uniformmix_chains <- function(julia){
 #' @export
 build_llhazardmix_config <- function(
     n_component,
-    R_factor = 0.9,
+    R_factor = 0.99,
     a_sig2 = 2.1,
     b_sig2 = 1.0,
     m_beta = 0.0,
