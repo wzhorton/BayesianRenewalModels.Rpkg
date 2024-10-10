@@ -4,14 +4,14 @@
 \alias{build_modrp_config}
 \title{ModRP config builder}
 \usage{
-build_modrp_config(n_component, Lambda, a_alpha = 3, b_alpha = 1)
+build_modrp_config(n_component, a_alpha = 3, b_alpha = 1, Lambda_factor = 1)
 }
 \arguments{
 \item{n_component}{number of intensity mixture components}
 
-\item{Lambda}{total modulating intensity. Values near n are reasonable.}
-
 \item{a_alpha, b_alpha}{prior parameter values for Dirichlet process alpha}
+
+\item{Lambda_factor}{adjustment factor for total modulating intensity.}
 }
 \value{
 list containing metadata and relevant parameter info

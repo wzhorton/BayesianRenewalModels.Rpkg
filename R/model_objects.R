@@ -76,11 +76,11 @@ extract_mrp_chains <- function(julia){
 #' Modulated Renewal Process (ModRP)
 #'
 #' @param n_component number of intensity mixture components
-#' @param Lambda total modulating intensity. Values near n are reasonable.
 #' @param a_alpha,b_alpha prior parameter values for Dirichlet process alpha
+#' @param Lambda_factor adjustment factor for total modulating intensity.
 #' @return list containing metadata and relevant parameter info
 #' @export
-build_modrp_config <- function(n_component, Lambda, a_alpha = 3.0, b_alpha = 1.0){
+build_modrp_config <- function(n_component, a_alpha = 3.0, b_alpha = 1.0, Lambda_factor = 1.0){
   list(
     type = "process",
     subtype = "ModRP",
@@ -90,12 +90,6 @@ build_modrp_config <- function(n_component, Lambda, a_alpha = 3.0, b_alpha = 1.0
         julia_name = "n_component",
         value = n_component,
         type = "int",
-        default = FALSE
-      ),
-      list(
-        julia_name = "Λ",
-        value = Lambda,
-        type = "float",
         default = FALSE
       ),
       list(
@@ -109,6 +103,12 @@ build_modrp_config <- function(n_component, Lambda, a_alpha = 3.0, b_alpha = 1.0
         value = b_alpha,
         type = "float",
         default = b_alpha == formals(build_modrp_config)$b_alpha
+      ),
+      list(
+        julia_name = "Λ_factor",
+        value = Lambda_factor,
+        type = "float",
+        default = Lambda_factor == formals(build_modrp_config)$Lambda_factor
       )
     )
   )
