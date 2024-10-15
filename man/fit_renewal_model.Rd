@@ -28,6 +28,8 @@ fit_renewal_model(
   save_predictive_samples = FALSE,
   save_predictive_state_recurrence_ecdf = FALSE,
   n_ecdf_eval = 100,
+  save_conditional_interarrival_densities = FALSE,
+  conditional_times = c(0, max_time),
   verbose = TRUE,
   display_call = FALSE
 )
@@ -82,6 +84,10 @@ samples.}
 \item{verbose}{indicates whether to display sampling progress messages}
 
 \item{display_call}{indicate whether to print the function call generated}
+
+\item{save_conditional_interarrival_densitiesl, conditional_times}{configuration
+for wether to compute modrp conditional interarrival densities and at what
+conditional times.}
 }
 \description{
 Given a certain configuration setup, passes relevant data to julia, runs the

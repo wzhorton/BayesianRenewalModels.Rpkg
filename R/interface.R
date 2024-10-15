@@ -65,6 +65,9 @@ nondefault_config_string <- function(config, function_name = config$subtype){
 #' @param save_predictive_state_recurrence_ecdf,n_ecdf_eval configuration for
 #' whether to compute ecdf evaluations and ecdf errors from the predictive
 #' samples.
+#' @param save_conditional_interarrival_densitiesl,conditional_times configuration
+#' for wether to compute modrp conditional interarrival densities and at what
+#' conditional times.
 #' @param verbose indicates whether to display sampling progress messages
 #' @param display_call indicate whether to print the function call generated
 #' @export
@@ -92,6 +95,8 @@ fit_renewal_model <- function(
     save_predictive_samples = FALSE,
     save_predictive_state_recurrence_ecdf = FALSE,
     n_ecdf_eval = 100,
+    save_conditional_interarrival_densities = FALSE,
+    conditional_times = c(0, max_time),
     verbose = TRUE,
     display_call = FALSE
 ){
@@ -265,6 +270,17 @@ fit_renewal_model <- function(
           ", tuple_output...; n_ecdf_eval = ",
           n_ecdf_eval,
           ", verbose = ",
+          ifelse(verbose, "true", "false"),
+          ")"
+        )
+      )
+    }
+    if(save_conditional_interarrival_densities && process_config$subtype == "ModRP"){
+      julia$assign("conditional_times", conditional_times)
+      julia$command(
+        paste0(
+          "save_conditional_interarrival_densities!(tuple_output..., conditional_times",
+          "; verbose = ",
           ifelse(verbose, "true", "false"),
           ")"
         )
