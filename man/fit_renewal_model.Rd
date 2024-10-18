@@ -30,6 +30,7 @@ fit_renewal_model(
   n_ecdf_eval = 100,
   save_conditional_interarrival_densities = FALSE,
   conditional_times = c(0, max_time),
+  save_time_rescaling_values = FALSE,
   verbose = TRUE,
   display_call = FALSE
 )
@@ -80,6 +81,9 @@ MRP models.}
 \item{save_predictive_state_recurrence_ecdf, n_ecdf_eval}{configuration for
 whether to compute ecdf evaluations and ecdf errors from the predictive
 samples.}
+
+\item{save_time_rescaling_values}{configuration for whether to compute the
+time rescaling theorem values for model checking}
 
 \item{verbose}{indicates whether to display sampling progress messages}
 

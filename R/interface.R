@@ -68,6 +68,8 @@ nondefault_config_string <- function(config, function_name = config$subtype){
 #' @param save_conditional_interarrival_densitiesl,conditional_times configuration
 #' for wether to compute modrp conditional interarrival densities and at what
 #' conditional times.
+#' @param save_time_rescaling_values configuration for whether to compute the
+#' time rescaling theorem values for model checking
 #' @param verbose indicates whether to display sampling progress messages
 #' @param display_call indicate whether to print the function call generated
 #' @export
@@ -97,6 +99,7 @@ fit_renewal_model <- function(
     n_ecdf_eval = 100,
     save_conditional_interarrival_densities = FALSE,
     conditional_times = c(0, max_time),
+    save_time_rescaling_values = FALSE,
     verbose = TRUE,
     display_call = FALSE
 ){
@@ -281,6 +284,15 @@ fit_renewal_model <- function(
         paste0(
           "save_conditional_interarrival_densities!(tuple_output..., conditional_times",
           "; verbose = ",
+          ifelse(verbose, "true", "false"),
+          ")"
+        )
+      )
+    }
+    if(save_time_rescaling_values && process_config$subtype == "ModRP"){
+      julia$command(
+        paste0(
+          "save_time_rescaling_values!(interarrivals, tuple_output...; verbose = ",
           ifelse(verbose, "true", "false"),
           ")"
         )

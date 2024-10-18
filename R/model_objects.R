@@ -128,6 +128,7 @@ extract_modrp_chains <- function(julia){
   chains$ecdf_model_error = julia$eval('process_output.ecdf_model_error')
   chains$predictive_samples = as.list(julia$eval('process_output.predictive_samples'))
   chains$conditional_interarrival_densities = as.list(julia$eval('process_output.conditional_interarrival_densities'))
+  chains$time_rescaling_values = julia$eval('process_output.time_rescaling_values')
   return(chains)
 }
 
